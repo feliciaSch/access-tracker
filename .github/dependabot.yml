@@ -1,0 +1,15 @@
+# Dependabot opens pull requests when a dependency has a new version or a known vulnerability.
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
