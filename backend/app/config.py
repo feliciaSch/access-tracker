@@ -22,7 +22,7 @@ ALLOWED_ORIGINS = [
     if o.strip()
 ]
 
-JWT_SECRET = os.getenv("JWT_SECRET", "dev-only-change-me")
+JWT_SECRET = os.getenv("JWT_SECRET", "dev-only-insecure-secret-change-me-in-production")
 JWT_EXPIRES_MINUTES = int(os.getenv("JWT_EXPIRES_MINUTES", "480"))
 
 # An approver account is created on startup from these, so you can log in and approve requests.

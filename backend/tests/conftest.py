@@ -8,7 +8,7 @@ _tmp = tempfile.NamedTemporaryFile(suffix=".db", delete=False)
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp.name}"
 os.environ["ADMIN_USERNAME"] = "admin"
 os.environ["ADMIN_PASSWORD"] = "admin-password-123"
-os.environ["JWT_SECRET"] = "test-secret"
+os.environ["JWT_SECRET"] = "test-secret-that-is-at-least-32-bytes-long"
 
 from fastapi.testclient import TestClient  # noqa: E402
 
