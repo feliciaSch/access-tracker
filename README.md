@@ -2,7 +2,7 @@
 
 A small internal tool for requesting and approving access to systems. The app is deliberately simple; the focus is on deployment, infrastructure and monitoring.
 
-**Live app:** _add your Vercel URL here_  ·  **API:** https://access-tracker-api.onrender.com (`/docs` for interactive API docs, `/health` for status)
+**Live app:** https://access-tracker-beta.vercel.app  ·  **API:** https://access-tracker-api.onrender.com (`/docs` for interactive API docs, `/health` for status)
 
 ## Architecture
 
