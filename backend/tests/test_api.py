@@ -57,6 +57,23 @@ def test_full_lifecycle(client, user_headers, admin_headers):
     assert events[1]["actor"] == "admin"
 
 
+def test_requesters_only_see_their_own_requests(client, user_headers, admin_headers):
+    bob = client.post("/auth/register", json={"username": "bob", "password": "bob-password-1"})
+    bob_headers = {"Authorization": f"Bearer {bob.json()['access_token']}"}
+    r = client.post("/requests", headers=user_headers, json={
+        "resource": "billing-db", "access_level": "read", "justification": "Monthly invoice audit"})
+    alice_req = r.json()
+
+    # bob can't list, open or read the history of alice's request
+    assert all(x["requester"] == "bob" for x in client.get("/requests", headers=bob_headers).json())
+    assert client.get(f"/requests/{alice_req['id']}", headers=bob_headers).status_code == 404
+    assert client.get(f"/requests/{alice_req['id']}/audit", headers=bob_headers).status_code == 404
+
+    # alice still sees her own, and the approver sees everyone's
+    assert client.get(f"/requests/{alice_req['id']}", headers=user_headers).status_code == 200
+    assert any(x["id"] == alice_req["id"] for x in client.get("/requests", headers=admin_headers).json())
+
+
 def test_invalid_input_rejected(client, user_headers):
     r = client.post("/requests", headers=user_headers, json={
         "resource": "x", "access_level": "superuser", "justification": "because"})

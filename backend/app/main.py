@@ -189,7 +189,7 @@ def list_requests(
         like = f"%{q}%"
         stmt = stmt.where(or_(AccessRequest.requester.ilike(like), AccessRequest.resource.ilike(like),
                               AccessRequest.justification.ilike(like)))
-    if mine:
+    if mine or user.role != "approver":  # requesters only ever see their own requests
         stmt = stmt.where(AccessRequest.requester == user.username)
     return db.scalars(stmt).all()
 
@@ -201,9 +201,17 @@ def _get_or_404(db: Session, request_id: int) -> AccessRequest:
     return req
 
 
+def _get_visible_or_404(db: Session, request_id: int, user: User) -> AccessRequest:
+    req = _get_or_404(db, request_id)
+    # 404 rather than 403, so a requester can't tell whether someone else's request exists
+    if user.role != "approver" and req.requester != user.username:
+        raise HTTPException(404, f"Access request {request_id} not found")
+    return req
+
+
 @app.get("/requests/{request_id}", response_model=RequestOut)
 def get_request(request_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return _get_or_404(db, request_id)
+    return _get_visible_or_404(db, request_id, user)
 
 
 @app.patch("/requests/{request_id}/status", response_model=RequestOut)
@@ -224,7 +232,7 @@ def update_status(request_id: int, body: StatusUpdate, db: Session = Depends(get
 
 @app.get("/requests/{request_id}/audit", response_model=list[AuditOut])
 def get_audit(request_id: int, db: Session = Depends(get_db), user: User = Depends(current_user)):
-    return _get_or_404(db, request_id).audit_events
+    return _get_visible_or_404(db, request_id, user).audit_events
 
 
 # ---------- Debug (for the monitoring demo) ----------
